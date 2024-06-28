@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Management</title>
+    <!-- CSS styles -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: #FFF;
+            border: none;
+            cursor: pointer;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        .book {
+            border-bottom: 1px solid #CCC;
+            padding: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book Management</h1>
+        
+        <!-- Add New Book Section -->
+        <div>
+            <h2>Add a New Book</h2>
+            <div class="form-group">
+                <label for="author">AUTHOR:</label>
+                <input type="text" id="author" name="author" required placeholder="Author">
+            </div>
+            <div class="form-group">
+                <label for="title">TITLE:</label>
+                <input type="text" id="title" name="title" required placeholder="Title">
+            </div>
+            <div class="form-group">
+                <label for="genre">GENRE:</label>
+                <select id="genre" name="genre" required>
+                    <option value="Science fiction">Science fiction</option>
+                    <option value="Satire">Satire</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Action and Adventure">Action and Adventure</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Mystery">Mystery</option>
+                    <option value="Horror">Horror</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="price">PRICE:</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+            <button onclick="addBook()">Add Book</button>
+            <p id="addBookMessage"></p>
+        </div>
+        
+        <!-- Search Book Section -->
+        <div>
+            <h2>Search for a Book</h2>
+            <div class="form-group">
+                <label for="keyword">Keyword:</label>
+                <input type="text" id="keyword" name="keyword" placeholder="Keyword">
+            </div>
+            <button onclick="searchBook()">Search</button>
+            <div class="results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Funtions -->
+    <script>
+        /* Funtion to add a new book in the database */
+        async function addBook() {
+            const author = document.getElementById('author').value;
+            const title = document.getElementById('title').value;
+            const genre = document.getElementById('genre').value;
+            const price = document.getElementById('price').value;
+            
+            const response = await fetch('http://localhost:3000/books/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ author, title, genre, price: parseFloat(price) })
+            });
+
+            const result = await response.json();
+            const messageElement = document.getElementById('addBookMessage');
+            if (response.ok) {
+                messageElement.textContent = 'Book added successfully!';
+                messageElement.style.color = 'green';
+            } else {
+                messageElement.textContent = `Failed to add book: ${result.message}`;
+                messageElement.style.color = 'red';
+            }
+        }
+        /* Function to search a book in the database*/
+        async function searchBook() {
+            const keyword = document.getElementById('keyword').value;
+            const response = await fetch(`http://localhost:3000/books/${keyword}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const books = await response.json();
+            const resultsElement = document.getElementById('searchResults');
+            resultsElement.innerHTML = '';
+
+            if (books.length > 0) {
+                books.forEach(book => {
+                    const bookElement = document.createElement('div');
+                    bookElement.className = 'book';
+                    bookElement.innerHTML = `
+                        <p><strong>ID:</strong> ${book.id}</p>
+                        <p><strong>Author:</strong> ${book.author}</p>
+                        <p><strong>Title:</strong> ${book.title}</p>
+                        <p><strong>Genre:</strong> ${book.genre}</p>
+                        <p><strong>Price:</strong> ${book.price}€</p>
+                    `;
+                    resultsElement.appendChild(bookElement);
+                });
+            } else {
+                resultsElement.textContent = 'No books found.';
+            }
+        }
+    </script>
+</body>
+</html>
