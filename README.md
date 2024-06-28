@@ -9,13 +9,7 @@ The Book Management Application is a simple web-based system designed to manage 
 - Simple and intuitive user interface.
 
 ## Project Structure
-book-management/
-
-├── client.html
-
-├── server.js
-
-├── package.json
+#book-management/
 
 ## Prerequisites
 - Node.js
